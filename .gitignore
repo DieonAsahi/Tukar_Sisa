@@ -1,0 +1,26 @@
+# Dependencies & Build Output
+node_modules/
+dist/
+dist-ssr/
+*.local
+
+# Environment Variables (Tetap izinkan .env.example)
+.env
+.env.*
+!.env.example
+
+# Private Database Schema, Docs & Competition PRD Files
+supabase/
+docs/
+*PRD*
+*.pdf
+*laporan-audit*
+
+# IDE, OS & Logs
+.vscode/*
+!.vscode/extensions.json
+.idea/
+.DS_Store
+Thumbs.db
+*.log
+npm-debug.log*
