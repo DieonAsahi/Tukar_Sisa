@@ -10,212 +10,155 @@
         </div>
         <div>
           <div class="flex items-center gap-1.5">
-            <h1 class="text-base sm:text-lg font-extrabold text-slate-900 leading-tight">
-              Bursa Limbah UMKM
+            <h1 class="text-base sm:text-lg font-black text-slate-900 leading-tight">
+              Bursa Limbah
             </h1>
             <span class="inline-block text-[10px] font-black uppercase tracking-wider bg-emerald-100 text-emerald-800 px-1.5 py-0.5 rounded">
-              SDG 8 & 12
+              SDG 12
             </span>
           </div>
           <p class="text-[11px] text-slate-500 font-medium leading-none mt-0.5 hidden sm:block">
-            {{ isCurrentAdminRoute ? 'Panel Pengawas /admin' : 'Pertukaran Bahan Baku Antar-UMKM' }}
+            {{ isCurrentAdminRoute ? 'Panel Pengawas /admin' : 'Penyaluran Sisa Bernilai Antar-Pengguna' }}
           </p>
         </div>
       </div>
 
       <!-- 2. Navigasi Horizontal Desktop (hidden md:flex) -->
       <nav v-if="!isCurrentAdminRoute" class="hidden md:flex items-center gap-1 bg-slate-100/90 p-1 rounded-2xl border border-slate-200">
+        <!-- Cari -->
         <button
-          @click="$emit('update:tab', 'katalog')"
+          @click="$emit('update:tab', 'cari')"
           :class="[
-            'px-3 py-1.5 rounded-xl text-xs font-bold transition flex items-center gap-1',
-            currentTab === 'katalog'
-              ? 'bg-white text-emerald-800 shadow-sm font-extrabold'
+            'px-3 py-1.5 rounded-xl text-xs font-bold transition flex items-center gap-1.5',
+            currentTab === 'cari'
+              ? 'bg-white text-brand-800 shadow-sm font-extrabold'
               : 'text-slate-600 hover:text-slate-900 hover:bg-white/60'
           ]"
         >
-          <span>🗺️</span>
-          <span>Peta & Sisa</span>
+          <span>🔍</span>
+          <span>Cari</span>
         </button>
 
+        <!-- Unggah -->
         <button
-          @click="$emit('update:tab', 'permintaan')"
-          :class="[
-            'px-3 py-1.5 rounded-xl text-xs font-bold transition flex items-center gap-1',
-            currentTab === 'permintaan'
-              ? 'bg-white text-emerald-800 shadow-sm font-extrabold'
-              : 'text-slate-600 hover:text-slate-900 hover:bg-white/60'
-          ]"
+          @click="$emit('open-upload')"
+          class="px-3 py-1.5 rounded-xl text-xs font-bold text-slate-700 hover:text-brand-800 hover:bg-white/60 transition flex items-center gap-1.5"
         >
           <span>📦</span>
-          <span>Cari Bahan</span>
+          <span>Unggah</span>
         </button>
 
+        <!-- Aktivitas -->
         <button
-          @click="$emit('update:tab', 'kamus')"
+          v-if="isAuthenticated"
+          @click="$emit('update:tab', 'aktivitas')"
           :class="[
-            'px-3 py-1.5 rounded-xl text-xs font-bold transition flex items-center gap-1',
-            currentTab === 'kamus'
-              ? 'bg-white text-emerald-800 shadow-sm font-extrabold'
+            'px-3 py-1.5 rounded-xl text-xs font-bold transition flex items-center gap-1.5 relative',
+            currentTab === 'aktivitas'
+              ? 'bg-white text-brand-800 shadow-sm font-extrabold'
+              : 'text-slate-600 hover:text-slate-900 hover:bg-white/60'
+          ]"
+        >
+          <span>🔔</span>
+          <span>Aktivitas</span>
+          <span
+            v-if="unreadNotificationsCount > 0"
+            class="w-4 h-4 rounded-full bg-red-600 text-white text-[9px] font-black flex items-center justify-center ml-0.5"
+          >
+            {{ unreadNotificationsCount }}
+          </span>
+        </button>
+
+        <!-- Edukasi (Bisa dibaca tamu) -->
+        <button
+          @click="$emit('update:tab', 'edukasi')"
+          :class="[
+            'px-3 py-1.5 rounded-xl text-xs font-bold transition flex items-center gap-1.5',
+            currentTab === 'edukasi'
+              ? 'bg-white text-brand-800 shadow-sm font-extrabold'
               : 'text-slate-600 hover:text-slate-900 hover:bg-white/60'
           ]"
         >
           <span>📖</span>
-          <span>Kamus</span>
+          <span>Edukasi</span>
         </button>
 
+        <!-- Dampak Lingkungan Publik -->
         <button
           @click="$emit('update:tab', 'dampak')"
           :class="[
-            'px-3 py-1.5 rounded-xl text-xs font-bold transition flex items-center gap-1',
+            'px-3 py-1.5 rounded-xl text-xs font-bold transition flex items-center gap-1.5',
             currentTab === 'dampak'
-              ? 'bg-white text-emerald-800 shadow-sm font-extrabold'
+              ? 'bg-white text-brand-800 shadow-sm font-extrabold'
               : 'text-slate-600 hover:text-slate-900 hover:bg-white/60'
           ]"
         >
           <span>🌱</span>
-          <span>Dampak</span>
+          <span>Dampak (kg)</span>
         </button>
 
-        <!-- Tab Khusus Pengguna Login: Listing Saya (U9) & Favorit (U23) -->
+        <!-- Akun (jika login) -->
         <button
           v-if="isAuthenticated"
-          @click="$emit('update:tab', 'kelola')"
+          @click="$emit('update:tab', 'akun')"
           :class="[
-            'px-3 py-1.5 rounded-xl text-xs font-bold transition flex items-center gap-1',
-            currentTab === 'kelola'
-              ? 'bg-white text-emerald-800 shadow-sm font-extrabold'
+            'px-3 py-1.5 rounded-xl text-xs font-bold transition flex items-center gap-1.5',
+            currentTab === 'akun'
+              ? 'bg-white text-brand-800 shadow-sm font-extrabold'
               : 'text-slate-600 hover:text-slate-900 hover:bg-white/60'
           ]"
         >
-          <span>📑</span>
-          <span>Posting Saya</span>
-        </button>
-
-        <button
-          v-if="isAuthenticated"
-          @click="$emit('update:tab', 'favorit')"
-          :class="[
-            'px-3 py-1.5 rounded-xl text-xs font-bold transition flex items-center gap-1',
-            currentTab === 'favorit'
-              ? 'bg-white text-emerald-800 shadow-sm font-extrabold'
-              : 'text-slate-600 hover:text-slate-900 hover:bg-white/60'
-          ]"
-        >
-          <span>⭐</span>
-          <span>Favorit</span>
+          <span>👤</span>
+          <span>Akun</span>
         </button>
       </nav>
 
-      <!-- 3. Action Buttons & User Area -->
-      <div class="flex items-center gap-1.5 sm:gap-2 shrink-0">
-        <!-- Tombol Bantuan, Pedoman Keselamatan & Privasi UU PDP (V7) -->
+      <!-- 3. Tombol Aksi Kanan -->
+      <div class="flex items-center gap-2 shrink-0">
+        <!-- Tombol Syarat & Bantuan -->
         <button
           @click="$emit('open-help')"
           class="p-2 text-slate-500 hover:text-brand-700 hover:bg-slate-100 rounded-xl transition"
-          title="Bantuan, Aturan Platform, Pedoman Keselamatan & Privasi UU PDP"
+          title="Aturan Platform, Barang Terlarang & Panduan Keselamatan"
         >
           <svg class="w-5 h-5" fill="none" stroke="currentColor" viewBox="0 0 24 24">
             <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M8.228 9c.549-1.165 2.03-2 3.772-2 2.21 0 4 1.343 4 3 0 1.4-1.278 2.575-3.006 2.907-.542.104-.994.54-.994 1.093m0 3h.01M21 12a9 9 0 11-18 0 9 9 0 0118 0z" />
           </svg>
         </button>
 
-        <!-- Tombol Notifikasi In-App (U20) jika sudah login -->
+        <!-- Tombol Menuju /admin -->
         <button
-          v-if="isAuthenticated"
-          @click="$emit('open-notifications')"
-          class="relative p-2 text-slate-600 hover:text-brand-700 hover:bg-slate-100 rounded-xl transition"
-          title="Pusat Notifikasi"
-        >
-          <svg class="w-5 h-5" fill="none" stroke="currentColor" viewBox="0 0 24 24">
-            <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M15 17h5l-1.405-1.405A2.032 2.032 0 0118 14.158V11a6.002 6.002 0 00-4-5.659V5a2 2 0 10-4 0v.341C7.67 6.165 6 8.388 6 11v3.159c0 .538-.214 1.055-.595 1.436L4 17h5m6 0v1a3 3 0 11-6 0v-1m6 0H9" />
-          </svg>
-          <span
-            v-if="unreadNotificationsCount > 0"
-            class="absolute top-1 right-1 w-4 h-4 bg-red-600 text-white text-[10px] font-black rounded-full flex items-center justify-center animate-pulse"
-          >
-            {{ unreadNotificationsCount }}
-          </span>
-        </button>
-
-        <!-- Tombol Desktop + Posting Limbah & + Kebutuhan -->
-        <div v-if="!isCurrentAdminRoute" class="hidden md:flex items-center gap-1.5">
-          <button
-            @click="$emit('open-material-request')"
-            class="inline-flex items-center gap-1 px-3 py-2 text-xs font-bold rounded-xl bg-slate-100 hover:bg-slate-200 text-slate-700 border border-slate-300 transition"
-            title="Cari Pasokan Bahan Baku yang Anda Butuhkan"
-          >
-            <span>📦</span>
-            <span>+ Kebutuhan</span>
-          </button>
-
-          <button
-            @click="$emit('open-quick-post')"
-            class="inline-flex items-center gap-1.5 px-3.5 py-2 text-xs font-bold rounded-xl bg-emerald-600 hover:bg-emerald-700 text-white shadow-sm shadow-emerald-600/30 active:scale-95 transition"
-            title="Posting Limbah Produksi Anda (Cepat < 1 Menit)"
-          >
-            <svg class="w-4 h-4" fill="none" stroke="currentColor" viewBox="0 0 24 24">
-              <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2.5" d="M12 4v16m8-8H4" />
-            </svg>
-            <span>+ Posting Limbah</span>
-          </button>
-        </div>
-
-        <!-- Tombol Beralih ke /admin (jika akun admin) -->
-        <button
-          v-if="isAdmin && !isCurrentAdminRoute"
+          v-if="(isAdmin || isDemoMode) && !isCurrentAdminRoute"
           @click="$emit('navigate-admin')"
-          class="px-2.5 sm:px-3 py-1.5 text-xs font-black bg-slate-900 hover:bg-slate-800 text-white rounded-xl shadow-sm flex items-center gap-1 transition"
-          title="Buka Panel Moderasi /admin"
+          class="px-2.5 py-1.5 text-xs font-black bg-slate-900 hover:bg-slate-800 text-white rounded-xl shadow-sm flex items-center gap-1 transition"
+          title="Panel Pengawas & Moderasi /admin"
         >
           <span>🛡️</span>
           <span>/admin</span>
         </button>
 
-        <!-- Jika belum login -> Tombol Masuk OTP -->
+        <!-- Tombol Masuk OTP jika Tamu -->
         <button
           v-if="!isAuthenticated"
           @click="openAuthModal"
           class="inline-flex items-center gap-1.5 px-3 py-2 text-xs font-bold text-white bg-brand-600 hover:bg-brand-700 active:scale-95 rounded-xl shadow-sm transition"
         >
-          <svg class="w-4 h-4" fill="none" stroke="currentColor" viewBox="0 0 24 24">
-            <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M11 16l-4-4m0 0l4-4m-4 4h14m-5 4v1a3 3 0 01-3 3H6a3 3 0 01-3-3V7a3 3 0 013-3h7a3 3 0 013 3v1" />
-          </svg>
           <span>Masuk / OTP</span>
         </button>
 
-        <!-- Jika sudah login -->
-        <div v-else class="flex items-center gap-1.5 sm:gap-2">
-          <!-- Profil Usaha & Lencana -->
-          <button
-            @click="$emit('open-profile-setup')"
-            class="flex items-center gap-1.5 px-2.5 sm:px-3 py-1.5 rounded-xl bg-emerald-50 hover:bg-emerald-100 border border-emerald-200 text-emerald-900 text-xs font-bold transition"
-            title="Klik untuk melihat dan melengkapi Profil Usaha Anda"
-          >
-            <span>🏪</span>
-            <span class="max-w-[100px] sm:max-w-[140px] truncate">
-              {{ currentUser?.nama_usaha || currentUser?.email?.split('@')[0] || 'Profil Usaha' }}
-            </span>
-            <span
-              v-if="currentUser?.is_lokasi_terverifikasi"
-              class="w-2 h-2 rounded-full bg-emerald-500"
-              title="Lokasi Terverifikasi"
-            ></span>
-          </button>
-
-          <!-- Tombol Pengaturan Akun & Hapus Akun UU PDP (U7) -->
+        <!-- Profil & Tombol Keluar jika Login -->
+        <div v-else class="flex items-center gap-1.5">
           <button
             @click="$emit('open-settings')"
-            class="p-2 text-slate-500 hover:text-slate-800 hover:bg-slate-100 rounded-xl transition"
-            title="Pengaturan Akun & Privasi UU PDP"
+            class="flex items-center gap-1.5 px-2.5 py-1.5 rounded-xl bg-slate-100 hover:bg-slate-200 border border-slate-200 text-slate-800 text-xs font-bold transition"
+            title="Pengaturan Akun & 3 Slot Lokasi"
           >
-            <svg class="w-5 h-5" fill="none" stroke="currentColor" viewBox="0 0 24 24">
-              <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M10.325 4.317c.426-1.756 2.924-1.756 3.35 0a1.724 1.724 0 002.573 1.066c1.543-.94 3.31.826 2.37 2.37a1.724 1.724 0 001.065 2.572c1.756.426 1.756 2.924 0 3.35a1.724 1.724 0 00-1.066 2.573c.94 1.543-.826 3.31-2.37 2.37a1.724 1.724 0 00-2.572 1.065c-.426 1.756-2.924 1.756-3.35 0a1.724 1.724 0 00-2.573-1.066c-1.543.94-3.31-.826-2.37-2.37a1.724 1.724 0 00-1.065-2.572c-1.756-.426-1.756-2.924 0-3.35a1.724 1.724 0 001.066-2.573c-.94-1.543.826-3.31 2.37-2.37.996.608 2.296.07 2.572-1.065z" />
-              <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M15 12a3 3 0 11-6 0 3 3 0 016 0z" />
-            </svg>
+            <span>🏪</span>
+            <span class="max-w-[120px] truncate">
+              {{ currentUser?.nama_tampilan || 'Profil' }}
+            </span>
           </button>
 
-          <!-- Tombol Keluar -->
           <button
             @click="logout"
             class="p-2 text-slate-400 hover:text-red-600 hover:bg-slate-100 rounded-xl transition"
@@ -229,15 +172,15 @@
       </div>
     </div>
 
-    <!-- Quick Role Switcher Bar (Alat Bantu Demo 30 Detik - Hanya Tampil Jika VITE_DEMO_MODE === 'true') -->
+    <!-- Quick Role Switcher Bar (Demo 30 Detik) -->
     <div
       v-if="isDemoMode"
-      class="bg-slate-50 border-t border-slate-200/80 px-4 sm:px-6 lg:px-8 py-1.5"
+      class="bg-slate-50 border-t border-slate-200 px-4 sm:px-6 lg:px-8 py-1.5"
     >
       <div class="max-w-7xl mx-auto flex flex-wrap items-center justify-between gap-2 text-[11px] font-bold text-slate-600">
         <span class="flex items-center gap-1.5">
           <span class="w-2 h-2 rounded-full bg-amber-500 animate-pulse"></span>
-          <span>Demo Role Switcher (Simulasi Cepat):</span>
+          <span>Simulasi Peran Demo (PRD Baru):</span>
         </span>
         <div class="flex items-center gap-1.5">
           <button
@@ -247,7 +190,7 @@
               !isAuthenticated ? 'bg-slate-800 text-white shadow-sm' : 'bg-white border border-slate-200 text-slate-600 hover:bg-slate-100'
             ]"
           >
-            Tamu (Publik)
+            Tamu
           </button>
           <button
             @click="handleSwitchRole('pengguna')"
@@ -256,7 +199,7 @@
               isAuthenticated && !isAdmin && currentUser?.status_akun === 'aktif' ? 'bg-brand-600 text-white shadow-sm' : 'bg-white border border-slate-200 text-slate-600 hover:bg-slate-100'
             ]"
           >
-            Pengguna UMKM
+            Pengguna
           </button>
           <button
             @click="handleSwitchRole('admin')"
@@ -268,7 +211,7 @@
             Admin (/admin)
           </button>
           <button
-            @click="handleSwitchRole('ditangguhkan')"
+            @click="handleSwitchRole('disanksi')"
             :class="[
               'px-2 py-0.5 rounded-lg text-xs font-semibold transition',
               currentUser?.status_akun === 'ditangguhkan' ? 'bg-red-700 text-white shadow-sm' : 'bg-white border border-slate-200 text-slate-600 hover:bg-slate-100'
@@ -290,29 +233,33 @@ const isDemoMode = computed(() => import.meta.env.VITE_DEMO_MODE === 'true');
 
 defineProps<{
   isCurrentAdminRoute?: boolean;
-  currentTab?: 'katalog' | 'permintaan' | 'kamus' | 'dampak' | 'kelola' | 'favorit';
+  currentTab?: string;
 }>();
 
 const emit = defineEmits([
-  'open-verify-location',
-  'open-profile-setup',
-  'open-quick-post',
-  'open-material-request',
-  'open-notifications',
-  'open-help',
-  'open-settings',
   'navigate-admin',
   'navigate-home',
-  'update:tab'
+  'update:tab',
+  'open-upload',
+  'open-settings',
+  'open-help'
 ]);
 
-const { currentUser, isAuthenticated, isAdmin, isAuthModalOpen, unreadNotificationsCount, loginAs, logout } = useWasteApp();
+const {
+  currentUser,
+  isAuthenticated,
+  isAdmin,
+  unreadNotificationsCount,
+  isAuthModalOpen,
+  loginAs,
+  logout
+} = useWasteApp();
 
 function openAuthModal() {
   isAuthModalOpen.value = true;
 }
 
-function handleSwitchRole(type: 'tamu' | 'pengguna' | 'admin' | 'ditangguhkan') {
+function handleSwitchRole(type: 'tamu' | 'pengguna' | 'admin' | 'disanksi') {
   if (type === 'tamu') {
     logout();
     emit('navigate-home');
@@ -322,7 +269,7 @@ function handleSwitchRole(type: 'tamu' | 'pengguna' | 'admin' | 'ditangguhkan') 
   } else if (type === 'admin') {
     loginAs('admin');
     emit('navigate-admin');
-  } else if (type === 'ditangguhkan') {
+  } else if (type === 'disanksi') {
     loginAs('suspended');
     emit('navigate-home');
   }

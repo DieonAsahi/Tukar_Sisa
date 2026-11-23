@@ -7,75 +7,43 @@
       @update:tab="currentTab = $event"
       @navigate-admin="handleGoAdmin"
       @navigate-home="handleGoHome"
-      @open-verify-location="isLocationVerifyOpen = true"
-      @open-profile-setup="isProfileSetupOpen = true"
-      @open-quick-post="handleOpenQuickPost"
-      @open-material-request="handleOpenMaterialRequest"
-      @open-notifications="isNotificationsOpen = true"
-      @open-help="isHelpOpen = true"
+      @open-upload="handleOpenQuickPost"
       @open-settings="isSettingsOpen = true"
+      @open-help="isHelpOpen = true"
     />
 
-    <!-- Banner Peringatan Sanksi Akun & Route Guard -->
+    <!-- Banner Peringatan Sanksi Akun -->
     <div class="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 w-full pt-3">
       <SanctionBanner />
-
-      <!-- Peringatan Route Guard jika pengguna biasa mencoba akses /admin -->
-      <div
-        v-if="routeGuardAlert"
-        class="p-3 bg-red-100 border border-red-300 rounded-2xl text-xs text-red-900 font-bold mb-3 flex items-center justify-between shadow-sm"
-      >
-        <div class="flex items-center gap-2">
-          <span>🚫</span>
-          <span>{{ routeGuardAlert }}</span>
-        </div>
-        <button @click="routeGuardAlert = null" class="text-red-700 hover:text-red-900 font-black px-1">✕</button>
-      </div>
     </div>
 
     <!-- MAIN BODY -->
-    <!-- RUTE 1: /admin (Panel Moderasi & Kontrol) -->
+    <!-- RUTE 1: /admin (Panel Moderasi & Pengawas) -->
     <main v-if="currentPath === '/admin'" class="flex-1 max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 w-full py-4">
       <AdminDashboard @navigate-home="handleGoHome" />
     </main>
 
-    <!-- RUTE 2: / (Mode Bersama: Pengunjung Tamu & Pengguna Terdaftar) -->
+    <!-- RUTE 2: / (Cari, Unggah, Aktivitas, Akun, Edukasi, Dampak) -->
     <main v-else class="flex-1 max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 w-full py-4 space-y-4">
-      <!-- V1: HERO SECTION UNTUK PENGUNJUNG PUBLIK / TAMU -->
+      <!-- HERO SECTION UNTUK PENGUNJUNG TAMU (G1) -->
       <div
-        v-if="!isAuthenticated && currentTab === 'katalog'"
+        v-if="!isAuthenticated && currentTab === 'cari'"
         class="bg-gradient-to-tr from-brand-900 via-emerald-950 to-slate-900 rounded-3xl p-6 sm:p-8 text-white shadow-xl relative overflow-hidden"
       >
         <div class="relative z-10 max-w-2xl space-y-3">
           <div class="inline-flex items-center gap-1.5 px-3 py-1 rounded-full bg-emerald-500/20 border border-emerald-400/30 text-xs font-bold text-emerald-300">
-            <span>🌱</span> Platform Ekonomi Sirkular Antar-UMKM (SDG 8 & 12)
+            <span>🌱</span> Platform Sisa Bernilai Antar-Pengguna (SDG 12)
           </div>
 
           <h2 class="text-2xl sm:text-3xl font-black leading-tight text-white">
-            Ubah Sisa Limbah UMKM Jadi Peluang Usaha & Cuan Bersama
+            Ubah Sisa Bernilai Jadi Peluang Usaha & Cuan Bersama
           </h2>
 
           <p class="text-xs sm:text-sm text-slate-300 font-medium leading-relaxed">
-            Jangan biarkan sisa kain konveksi, serbuk kayu, ampas kopi, atau kardus menumpuk dan bayar retribusi sampah mahal. Salurkan langsung ke sesama UMKM yang membutuhkan bahan baku daur ulang!
+            Percepat rantai pemakaian ulang sisa dapur, ampas kopi, kain perca, dan serbuk kayu sebelum menjadi sampah. Tanpa perantara, tanpa kurir, dan lokasi terlindungi.
           </p>
 
-          <!-- 3 Langkah Sederhana (V1) -->
-          <div class="grid grid-cols-1 sm:grid-cols-3 gap-2.5 pt-2">
-            <div class="bg-white/10 backdrop-blur p-3 rounded-2xl border border-white/10">
-              <div class="text-base mb-1">📍 1. Atur Radius</div>
-              <div class="text-[11px] text-slate-300">Cari limbah terdekat 1–100 km dari bengkel atau tempat usaha Anda.</div>
-            </div>
-            <div class="bg-white/10 backdrop-blur p-3 rounded-2xl border border-white/10">
-              <div class="text-base mb-1">🤝 2. Kontak WhatsApp</div>
-              <div class="text-[11px] text-slate-300">Buka koordinat presisi & nomor WhatsApp dengan verifikasi OTP Email.</div>
-            </div>
-            <div class="bg-white/10 backdrop-blur p-3 rounded-2xl border border-white/10">
-              <div class="text-base mb-1">♻️ 3. Ambil & Olah</div>
-              <div class="text-[11px] text-slate-300">Cek sampel di lokasi fisik, konfirmasi transaksi, dan catat kg limbah dialihkan.</div>
-            </div>
-          </div>
-
-          <div class="pt-2 flex flex-wrap items-center gap-3">
+          <div class="pt-2 flex flex-wrap items-center gap-2.5">
             <button
               @click="isAuthModalOpen = true"
               class="py-2.5 px-4 bg-emerald-500 hover:bg-emerald-600 active:scale-95 text-slate-950 font-black text-xs rounded-xl shadow-lg transition"
@@ -83,111 +51,106 @@
               Masuk via OTP Email (Gratis)
             </button>
             <button
+              @click="currentTab = 'edukasi'"
+              class="py-2.5 px-4 bg-white/10 hover:bg-white/20 text-white font-bold text-xs rounded-xl transition"
+            >
+              📖 Baca Panduan Edukasi
+            </button>
+            <button
               @click="isHelpOpen = true"
               class="py-2.5 px-4 bg-white/10 hover:bg-white/20 text-white font-bold text-xs rounded-xl transition"
             >
-              Baca Aturan & Pedoman Keamanan
+              Aturan & Barang Terlarang
             </button>
           </div>
         </div>
       </div>
 
-      <!-- 1. TAB: KATALOG PASOKAN LIMBAH & PETA (SPLIT SCREEN DESKTOP VS 1-COLUMN MOBILE) -->
-      <section v-if="currentTab === 'katalog'">
+      <!-- 1. TAB: CARI SISA (U6 - TANPA PETA) -->
+      <section v-if="currentTab === 'cari'">
         <div class="lg:grid lg:grid-cols-12 lg:gap-6 items-start space-y-4 lg:space-y-0">
-          <!-- Kolom Kiri Desktop (lg:col-span-5, sticky): Pengatur Radius & Peta Interaktif -->
-          <div class="lg:col-span-5 lg:sticky lg:top-20 space-y-4">
-            <!-- Pengatur Radius 1–100 km & Deteksi GPS -->
+          <!-- Kolom Kiri Desktop (lg:col-span-4): Pengatur Radius Slider (0-100 km) & Panduan -->
+          <div class="lg:col-span-4 lg:sticky lg:top-20 space-y-3">
             <RadiusSelector />
 
-            <!-- Peta Sumber Limbah (Lingkaran Samar Tamu vs Pin Presisi Terverifikasi) -->
-            <ClientOnly>
-              <InteractiveMap
-                :listings="filteredListings"
-                @select-listing="openListingDetail"
-              />
-            </ClientOnly>
-
-            <!-- Edukasi Ringkas Radius & Privasi UU PDP -->
+            <!-- Banner Privasi Lokasi Aman -->
             <div class="bg-white rounded-2xl p-4 border border-slate-200 text-xs text-slate-500 space-y-1.5 shadow-sm">
-              <div class="font-extrabold text-slate-700 flex items-center justify-between">
-                <span class="flex items-center gap-1.5"><span>🛡️</span> Pedoman Privasi UU PDP</span>
+              <div class="font-extrabold text-slate-800 flex items-center justify-between">
+                <span class="flex items-center gap-1.5"><span>🛡️</span> Privasi Tanpa Peta</span>
                 <button @click="isHelpOpen = true" class="text-brand-700 hover:underline font-bold">Rincian</button>
               </div>
               <p class="text-[11px] leading-relaxed">
-                Pengunjung umum hanya melihat estimasi radius lingkaran (~800m). Detail alamat jalan presisi dan nomor WhatsApp terlindungi dan hanya dibuka kepada UMKM terdaftar yang hendak bertransaksi.
+                Platform tidak menampilkan peta atau alamat presisi. Jarak yang Anda lihat dihitung antar titik acak (pergeseran tetap maks 1 km).
               </p>
             </div>
           </div>
 
-          <!-- Kolom Kanan Desktop (lg:col-span-7): Filter Bar & Daftar Kartu Pasokan Limbah -->
-          <div class="lg:col-span-7 space-y-3">
-            <!-- U12: BAR FILTER & PENGURUTAN LENGKAP -->
+          <!-- Kolom Kanan Desktop (lg:col-span-8): Filter & Daftar Kartu Sisa -->
+          <div class="lg:col-span-8 space-y-3">
+            <!-- Filter Bar: Kata Kunci, Kategori, Harga, Urutkan -->
             <div class="bg-white rounded-2xl p-3.5 border border-slate-200 shadow-sm space-y-2.5">
-              <div class="flex flex-wrap items-center justify-between gap-2 text-xs font-bold text-slate-700">
-                <span class="flex items-center gap-1.5">
-                  <span>🎯</span>
-                  <span>Filter Pasokan ({{ filteredListings.length }} Ditemukan)</span>
-                </span>
-                <!-- Urutkan (U14) -->
-                <div class="flex items-center gap-1.5">
-                  <span class="text-slate-400 font-normal">Urutkan:</span>
+              <!-- Baris 1: Pencarian Kata Kunci & Urutan -->
+              <div class="flex flex-col sm:flex-row items-center gap-2">
+                <div class="relative flex-1 w-full">
+                  <input
+                    type="text"
+                    v-model="searchQuery"
+                    placeholder="Cari sisa: ampas kopi, serbuk kayu, kain perca..."
+                    class="w-full bg-slate-50 border border-slate-200 rounded-xl pl-9 pr-3 py-2 text-xs font-bold text-slate-800 outline-none focus:ring-2 focus:ring-brand-500"
+                  />
+                  <span class="absolute left-3 top-2.5 text-slate-400 text-xs">🔍</span>
+                </div>
+
+                <div class="flex items-center gap-1.5 shrink-0 w-full sm:w-auto justify-between sm:justify-end">
+                  <span class="text-xs text-slate-400 font-medium">Urutkan:</span>
                   <select
                     v-model="sortBy"
-                    class="bg-slate-50 border border-slate-200 rounded-lg px-2 py-1 text-xs font-bold text-slate-800 outline-none"
+                    class="bg-slate-50 border border-slate-200 rounded-xl px-2.5 py-2 text-xs font-bold text-slate-800 outline-none"
                   >
-                    <option value="terdekat">Terdekat (GPS)</option>
+                    <option value="jarak">Terdekat</option>
                     <option value="terbaru">Terbaru Diposting</option>
-                    <option value="volume_terbanyak">Volume Terbanyak</option>
                   </select>
                 </div>
               </div>
 
-              <!-- Baris Kontrol Filter Kategori, Harga, dan Status Lokasi -->
-              <div class="grid grid-cols-1 sm:grid-cols-3 gap-2">
-                <!-- Dropdown Kategori -->
+              <!-- Baris 2: Dropdown Kategori & Jenis Harga -->
+              <div class="grid grid-cols-1 sm:grid-cols-2 gap-2">
+                <!-- Dropdown Kategori Non-B3 -->
                 <select
-                  v-model="filterCategoryId"
+                  v-model="selectedCategoryId"
                   class="w-full bg-slate-50 border border-slate-200 rounded-xl px-2.5 py-1.5 text-xs font-bold text-slate-800 outline-none"
                 >
-                  <option value="semua">Semua Kategori Non-B3</option>
+                  <option value="semua">Semua Kategori Sisa</option>
                   <option
                     v-for="cat in allowedCategories"
                     :key="cat.id"
                     :value="cat.id"
                   >
-                    {{ cat.nama }}
+                    {{ cat.nama }} ({{ cat.masa_tayang_jam }} jam)
                   </option>
                 </select>
 
-                <!-- Tipe Harga -->
+                <!-- Filter Jenis Harga -->
                 <select
-                  v-model="filterPriceType"
+                  v-model="selectedPriceType"
                   class="w-full bg-slate-50 border border-slate-200 rounded-xl px-2.5 py-1.5 text-xs font-bold text-slate-800 outline-none"
                 >
-                  <option value="semua">Semua Harga (Gratis & Jual)</option>
-                  <option value="gratis">Hanya Gratis (Hibah Limbah)</option>
-                  <option value="berbayar">Hanya Dijual Murah</option>
+                  <option value="semua">Semua Skema (Gratis, Uang, Barter)</option>
+                  <option value="gratis">Hanya Gratis (Hibah Sisa)</option>
+                  <option value="uang">Hanya Dijual Uang</option>
+                  <option value="barter">Hanya Skema Barter</option>
                 </select>
-
-                <!-- Toggle Hanya Lokasi Terverifikasi -->
-                <button
-                  type="button"
-                  @click="filterOnlyVerified = !filterOnlyVerified"
-                  :class="[
-                    'px-2.5 py-1.5 text-xs font-bold rounded-xl border transition flex items-center justify-center gap-1',
-                    filterOnlyVerified
-                      ? 'bg-emerald-50 text-emerald-800 border-emerald-300 shadow-sm'
-                      : 'bg-slate-50 text-slate-600 border-slate-200'
-                  ]"
-                >
-                  <span>📍</span>
-                  <span>{{ filterOnlyVerified ? 'Hanya Terverifikasi ✓' : 'Semua Lokasi' }}</span>
-                </button>
               </div>
             </div>
 
-            <!-- Daftar Kartu Listing Limbah -->
+            <!-- Total Temuan -->
+            <div class="flex items-center justify-between text-xs font-bold text-slate-500 px-1">
+              <span>Menampilkan {{ filteredListings.length }} postingan sisa bernilai</span>
+              <span v-if="radiusKm === 0" class="text-brand-700">Radius: Sekitar Saya (&lt; 2 km)</span>
+              <span v-else class="text-slate-600">Radius: {{ radiusKm }} km</span>
+            </div>
+
+            <!-- Daftar Kartu Listing -->
             <div v-if="filteredListings.length > 0" class="space-y-3">
               <ListingCard
                 v-for="listing in displayedListings"
@@ -196,7 +159,7 @@
                 @click-detail="openListingDetail"
               />
 
-              <!-- U12: Tombol Muat Lebih Banyak -->
+              <!-- Paginasi Muat Lebih Banyak -->
               <div v-if="hasMoreListings" class="flex justify-center pt-2 pb-4">
                 <button
                   @click="loadMoreListings"
@@ -207,21 +170,21 @@
               </div>
             </div>
 
-            <!-- State Kosong jika Radius Terlalu Sempit atau Filter Tidak Cocok -->
+            <!-- State Kosong jika Tidak Ada Hasil -->
             <div
               v-else
-              class="bg-white rounded-2xl p-8 text-center border border-slate-200 text-slate-500 space-y-2 shadow-sm"
+              class="bg-white rounded-3xl p-8 text-center border border-slate-200 text-slate-500 space-y-2 shadow-sm"
             >
               <div class="text-3xl">🔍</div>
               <div class="text-sm font-extrabold text-slate-800">
-                Tidak ada pasokan limbah yang sesuai dalam radius {{ radiusKm }} km
+                Tidak ada sisa bernilai dalam radius {{ radiusKm === 0 ? '< 2' : radiusKm }} km
               </div>
-              <p class="text-xs text-slate-500 max-w-sm mx-auto">
-                Coba perlebar radius pencarian Anda menjadi 25 km atau 50 km, atau ubah filter kategori dan harga di atas.
+              <p class="text-xs text-slate-400 max-w-sm mx-auto">
+                Coba perlebar radius pencarian menjadi 25 km atau 50 km, atau ubah filter kategori di atas.
               </p>
               <button
-                @click="setRadius(25); filterCategoryId = 'semua'; filterPriceType = 'semua'; filterOnlyVerified = false; displayLimit = 10"
-                class="px-4 py-2.5 bg-brand-600 hover:bg-brand-700 active:scale-95 text-white text-xs font-bold rounded-xl mt-2 transition shadow-sm"
+                @click="resetFilters"
+                class="px-4 py-2 bg-brand-600 hover:bg-brand-700 text-white text-xs font-bold rounded-xl mt-2 transition"
               >
                 Reset Filter & Perlebar ke 25 km
               </button>
@@ -230,69 +193,40 @@
         </div>
       </section>
 
-      <!-- 2. TAB: CARI BAHAN BAKU & REKOMENDASI MATCHING (U11, F7) -->
-      <section v-else-if="currentTab === 'permintaan'" class="max-w-4xl mx-auto">
-        <MatchingRecommendationsView @open-material-request="handleOpenMaterialRequest" />
+      <!-- 2. TAB: AKTIVITAS (DEALS BERJALAN & NOTIFIKASI REALTIME) -->
+      <section v-else-if="currentTab === 'aktivitas'">
+        <ActivityView @open-confirm="openConfirmDealModal" />
       </section>
 
-      <!-- 3. TAB: KAMUS "LIMBAH -> PELUANG" (F15, V5, V6) -->
-      <section v-else-if="currentTab === 'kamus'" class="max-w-4xl mx-auto">
-        <WasteDictionaryView />
+      <!-- 3. TAB: EDUKASI (PANDUAN PEMANFAATAN BERSUMBER) -->
+      <section v-else-if="currentTab === 'edukasi'">
+        <EducationView />
       </section>
 
-      <!-- 4. TAB: DASHBOARD DAMPAK (PUBLIK V2 & PRIBADI U22, SDG 8 & 12) -->
-      <section v-else-if="currentTab === 'dampak'" class="max-w-4xl mx-auto">
-        <ImpactDashboardView @open-confirm-tx="openConfirmTxModal" />
+      <!-- 4. TAB: DAMPAK LINGKUNGAN (SDG 12) -->
+      <section v-else-if="currentTab === 'dampak'">
+        <ImpactDashboardView />
       </section>
 
-      <!-- 5. TAB: KELOLA LISTING SAYA & PEMINAT (U9, U10) -->
-      <section v-else-if="currentTab === 'kelola'" class="max-w-4xl mx-auto">
-        <MyListingsView
-          @open-quick-post="handleOpenQuickPost"
-          @confirm-deal="openConfirmDealModal"
+      <!-- 5. TAB: AKUN SAYA (PROFIL, 3 SLOT LOKASI, POSTINGAN SAYA) -->
+      <section v-else-if="currentTab === 'akun'">
+        <AccountView
+          @open-settings="isSettingsOpen = true"
+          @open-upload="handleOpenQuickPost"
         />
-      </section>
-
-      <!-- 6. TAB: FAVORIT SAYA (U23) -->
-      <section v-else-if="currentTab === 'favorit'" class="max-w-4xl mx-auto space-y-4">
-        <div class="bg-white rounded-2xl border border-slate-200 p-4 shadow-sm flex items-center justify-between">
-          <div>
-            <h2 class="text-sm font-extrabold text-slate-900 flex items-center gap-1.5">
-              <span>⭐</span> Pasokan Limbah Favorit Saya (U23)
-            </h2>
-            <p class="text-xs text-slate-500 font-medium">Listing yang Anda simpan untuk dipantau atau dihubungi nanti.</p>
-          </div>
-          <span class="text-xs font-bold text-amber-700 bg-amber-50 px-2.5 py-1 rounded-full">
-            {{ favoriteListings.length }} Disimpan
-          </span>
-        </div>
-
-        <div v-if="favoriteListings.length > 0" class="space-y-3">
-          <ListingCard
-            v-for="item in favoriteListings"
-            :key="item.id"
-            :listing="item"
-            @click-detail="openListingDetail"
-          />
-        </div>
-        <div v-else class="bg-white rounded-2xl p-8 text-center border border-slate-200 text-slate-500 space-y-2">
-          <div class="text-3xl">⭐</div>
-          <div class="text-sm font-extrabold text-slate-800">Belum ada listing favorit</div>
-          <p class="text-xs text-slate-400">Klik ikon bintang pada kartu pasokan limbah untuk menyimpannya di sini.</p>
-        </div>
       </section>
     </main>
 
-    <!-- Bottom Navigation Bar Mobile-First (Hanya tampil di ponsel pada rute /) -->
+    <!-- Bottom Navigation Bar Mobile-First (4 Tab: Cari | Unggah | Aktivitas | Akun) -->
     <AppBottomNav
       v-if="currentPath === '/'"
       :current-tab="currentTab as any"
       @update:tab="currentTab = $event"
-      @open-quick-post="handleOpenQuickPost"
+      @open-upload="handleOpenQuickPost"
     />
 
-    <!-- MODAL & DIALOG LENGKAP PRD -->
-    <!-- Modal Detail Listing & Unlocked Kontak -->
+    <!-- MODAL LENGKAP -->
+    <!-- Modal Detail Postingan Sisa -->
     <ListingDetailModal
       v-if="selectedListing"
       :listing="selectedListing"
@@ -300,66 +234,40 @@
       @open-report="openReportModal"
     />
 
-    <!-- Modal Form Posting 1 Layar (< 1 menit, U8) -->
+    <!-- Modal Form Unggah Postingan Sisa (1-3 Foto, Hapus EXIF, 3 Slot Lokasi) -->
     <QuickPostModal
       v-if="isQuickPostOpen"
       @close="isQuickPostOpen = false"
       @created="onListingCreated"
     />
 
-    <!-- Modal Pasang Kebutuhan Bahan Baku (U11) -->
-    <MaterialRequestModal
-      :is-open="isMaterialRequestOpen"
-      @close="isMaterialRequestOpen = false"
-      @created="onMaterialRequestCreated"
-    />
-
-    <!-- Modal Verifikasi Lokasi Fisik (Toleransi <= 200m, U5) -->
-    <LocationVerifyModal
-      v-if="isLocationVerifyOpen"
-      @close="isLocationVerifyOpen = false"
-    />
-
-    <!-- Modal Konfirmasi Transaksi Dua Pihak (U17, U18) -->
+    <!-- Modal Konfirmasi Serah Terima Transaksi & Aduan -->
     <TransactionConfirmModal
-      v-if="isConfirmTxOpen"
+      v-if="isConfirmTxOpen && selectedDeal"
       :deal="selectedDeal"
       @close="isConfirmTxOpen = false; selectedDeal = null"
     />
 
-    <!-- Modal Pelaporan Listing / Profil (U19) -->
+    <!-- Modal Laporan Pelanggaran (Wajib Lampirkan Foto Bukti) -->
     <ReportModal
       v-if="isReportOpen"
       :listing="reportTargetListing"
       @close="isReportOpen = false"
     />
 
-    <!-- Modal Lengkapi Profil Usaha (U3, U4) -->
-    <ProfileSetupModal
-      :is-open="isProfileSetupOpen"
-      @close="isProfileSetupOpen = false"
-    />
-
-    <!-- Modal Login OTP Email (Supabase Auth, U1, U2) -->
+    <!-- Modal Login OTP Email -->
     <AuthOtpModal />
 
-    <!-- Modal Bantuan, Pedoman Keselamatan & Privasi UU PDP (V7) -->
+    <!-- Modal Syarat Penggunaan, Barang Terlarang & Panduan Keamanan -->
     <HelpLegalModal
       :is-open="isHelpOpen"
       @close="isHelpOpen = false"
     />
 
-    <!-- Modal Pusat Notifikasi In-App (U20) -->
-    <NotificationsModal
-      :is-open="isNotificationsOpen"
-      @close="isNotificationsOpen = false"
-    />
-
-    <!-- Modal Pengaturan Akun & Hapus Akun UU PDP (U7) -->
+    <!-- Modal Pengaturan Akun & 3 Slot Lokasi (UU PDP) -->
     <UserSettingsModal
-      :is-open="isSettingsOpen"
+      v-if="isSettingsOpen"
       @close="isSettingsOpen = false"
-      @open-profile="isProfileSetupOpen = true"
     />
   </div>
 </template>
@@ -374,48 +282,64 @@ import AppHeader from './components/AppHeader.vue';
 import AppBottomNav from './components/AppBottomNav.vue';
 import SanctionBanner from './components/SanctionBanner.vue';
 import RadiusSelector from './components/RadiusSelector.vue';
-import InteractiveMap from './components/InteractiveMap.vue';
 import ListingCard from './components/ListingCard.vue';
 import ListingDetailModal from './components/ListingDetailModal.vue';
 import QuickPostModal from './components/QuickPostModal.vue';
-import MaterialRequestModal from './components/MaterialRequestModal.vue';
-import LocationVerifyModal from './components/LocationVerifyModal.vue';
 import TransactionConfirmModal from './components/TransactionConfirmModal.vue';
 import ReportModal from './components/ReportModal.vue';
-import ProfileSetupModal from './components/ProfileSetupModal.vue';
 import AuthOtpModal from './components/AuthOtpModal.vue';
 import HelpLegalModal from './components/HelpLegalModal.vue';
-import NotificationsModal from './components/NotificationsModal.vue';
 import UserSettingsModal from './components/UserSettingsModal.vue';
-import MyListingsView from './components/MyListingsView.vue';
-import WasteDictionaryView from './components/WasteDictionaryView.vue';
+import ActivityView from './components/ActivityView.vue';
+import EducationView from './components/EducationView.vue';
 import ImpactDashboardView from './components/ImpactDashboardView.vue';
-import MatchingRecommendationsView from './components/MatchingRecommendationsView.vue';
+import AccountView from './components/AccountView.vue';
 import AdminDashboard from './components/admin/AdminDashboard.vue';
-import ClientOnly from './components/ClientOnly.vue';
 
 const {
   currentUser,
   isAuthenticated,
   filteredListings,
-  radiusKm,
-  setRadius,
-  requireAuth,
-  isProfileSetupOpen,
-  isAuthModalOpen,
   allowedCategories,
-  filterCategoryId,
-  filterPriceType,
-  filterOnlyVerified,
+  radiusKm,
+  searchQuery,
+  selectedCategoryId,
+  selectedPriceType,
   sortBy,
-  favoriteListings,
-  deals,
+  isAuthModalOpen,
+  requireAuth,
   loginAs
 } = useWasteApp();
 
-const { currentPath, routeGuardAlert, navigateTo } = useAppRouter(() => currentUser.value);
+const { currentPath, navigateTo } = useAppRouter(() => currentUser.value);
 
-// Inisialisasi rute saat pertama kali dimuat di browser
+const currentTab = ref<'cari' | 'unggah' | 'aktivitas' | 'akun' | 'edukasi' | 'dampak'>('cari');
+
+// Paginasi
+const displayLimit = ref(10);
+const displayedListings = computed(() => filteredListings.value.slice(0, displayLimit.value));
+const hasMoreListings = computed(() => filteredListings.value.length > displayLimit.value);
+
+function loadMoreListings() {
+  displayLimit.value += 10;
+}
+
+function resetFilters() {
+  radiusKm.value = 25;
+  searchQuery.value = '';
+  selectedCategoryId.value = 'semua';
+  selectedPriceType.value = 'semua';
+}
+
+const selectedListing = ref<WasteListing | null>(null);
+const isQuickPostOpen = ref(false);
+const isConfirmTxOpen = ref(false);
+const selectedDeal = ref<Deal | null>(null);
+const isReportOpen = ref(false);
+const reportTargetListing = ref<WasteListing | null>(null);
+const isHelpOpen = ref(false);
+const isSettingsOpen = ref(false);
+
 onMounted(() => {
   if (typeof window !== 'undefined' && window.location.pathname.startsWith('/admin')) {
     currentPath.value = '/admin';
@@ -425,30 +349,6 @@ onMounted(() => {
     }
   }
 });
-
-const currentTab = ref<'katalog' | 'permintaan' | 'kamus' | 'dampak' | 'kelola' | 'favorit'>('katalog');
-
-// U12: Paginasi "Muat Lebih Banyak" untuk katalog
-const displayLimit = ref(10);
-
-const displayedListings = computed(() => filteredListings.value.slice(0, displayLimit.value));
-const hasMoreListings = computed(() => filteredListings.value.length > displayLimit.value);
-
-function loadMoreListings() {
-  displayLimit.value += 10;
-}
-
-const selectedListing = ref<WasteListing | null>(null);
-const isQuickPostOpen = ref(false);
-const isMaterialRequestOpen = ref(false);
-const isLocationVerifyOpen = ref(false);
-const isConfirmTxOpen = ref(false);
-const selectedDeal = ref<Deal | null>(null);
-const isReportOpen = ref(false);
-const reportTargetListing = ref<WasteListing | null>(null);
-const isHelpOpen = ref(false);
-const isNotificationsOpen = ref(false);
-const isSettingsOpen = ref(false);
 
 function handleGoAdmin() {
   const isDemo = typeof import.meta !== 'undefined' && import.meta.env?.VITE_DEMO_MODE !== 'false';
@@ -467,23 +367,8 @@ function openListingDetail(listing: WasteListing) {
 }
 
 function handleOpenQuickPost() {
-  if (requireAuth('membuat posting limbah')) {
+  if (requireAuth('mengunggah postingan sisa')) {
     isQuickPostOpen.value = true;
-  }
-}
-
-function handleOpenMaterialRequest() {
-  if (requireAuth('membuat permintaan kebutuhan bahan baku')) {
-    isMaterialRequestOpen.value = true;
-  }
-}
-
-function openConfirmTxModal() {
-  if (requireAuth('mengonfirmasi transaksi')) {
-    // Cari deal yang masih berlangsung
-    const pendingDeal = deals.value.find(d => d.status === 'menghubungi');
-    selectedDeal.value = pendingDeal || deals.value[0] || null;
-    isConfirmTxOpen.value = true;
   }
 }
 
@@ -498,10 +383,6 @@ function openReportModal(listing: WasteListing) {
 }
 
 function onListingCreated() {
-  currentTab.value = 'katalog';
-}
-
-function onMaterialRequestCreated() {
-  currentTab.value = 'permintaan';
+  currentTab.value = 'cari';
 }
 </script>

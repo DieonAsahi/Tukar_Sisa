@@ -38,7 +38,7 @@ export function useAppRouter(currentUserGetter?: () => UserProfile | null) {
     // Route Guard untuk /admin jika bukan admin
     if (path === '/admin') {
       const activeUser = user !== undefined ? user : currentUserGetter ? currentUserGetter() : null;
-      const isDemo = typeof import.meta !== 'undefined' && import.meta.env?.VITE_DEMO_MODE !== 'false';
+      const isDemo = typeof import.meta !== 'undefined' && import.meta.env?.VITE_DEMO_MODE === 'true';
       
       // Jika mode demo tidak aktif dan bukan akun admin
       if (!isDemo && activeUser && activeUser.peran_sistem !== 'admin') {

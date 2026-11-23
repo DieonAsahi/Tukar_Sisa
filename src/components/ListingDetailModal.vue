@@ -1,201 +1,214 @@
 <template>
-  <div v-if="listing" class="fixed inset-0 z-50 flex items-end sm:items-center justify-center p-0 sm:p-4 bg-slate-900/60 backdrop-blur-sm">
-    <div class="bg-white w-full max-w-md max-h-[92vh] overflow-y-auto rounded-t-3xl sm:rounded-3xl shadow-2xl flex flex-col">
-      <!-- Header Bar Modal -->
-      <div class="sticky top-0 z-10 bg-white/95 backdrop-blur px-5 py-3 border-b border-slate-200 flex items-center justify-between">
-        <h2 class="text-sm font-extrabold text-slate-800 flex items-center gap-1.5">
-          <span>📋</span> Rincian Pasokan Sisa Limbah
-        </h2>
-        <div class="flex items-center gap-1">
-          <!-- Tombol Favorit (U23) -->
-          <button
-            @click="toggleFavorite(listing.id)"
-            class="p-1.5 text-slate-500 hover:text-amber-500 hover:bg-slate-100 rounded-xl transition"
-            :title="isFavorite(listing.id) ? 'Hapus dari favorit' : 'Simpan ke favorit'"
-          >
-            <span v-if="isFavorite(listing.id)" class="text-amber-500 text-sm">⭐</span>
-            <span v-else class="text-slate-400 text-sm">☆</span>
-          </button>
-          <button
-            @click="$emit('close')"
-            class="p-1.5 text-slate-400 hover:text-slate-600 rounded-xl hover:bg-slate-100 transition"
-          >
-            <svg class="w-6 h-6" fill="none" stroke="currentColor" viewBox="0 0 24 24">
-              <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M6 18L18 6M6 6l12 12" />
-            </svg>
-          </button>
+  <div class="fixed inset-0 z-50 overflow-y-auto bg-slate-900/60 backdrop-blur-sm flex items-center justify-center p-3 sm:p-4">
+    <div
+      class="bg-white rounded-3xl max-w-xl w-full max-h-[92vh] overflow-y-auto shadow-2xl border border-slate-100 flex flex-col"
+    >
+      <!-- Header Modal -->
+      <div class="sticky top-0 z-10 bg-white/95 backdrop-blur px-5 py-3.5 border-b border-slate-100 flex items-center justify-between">
+        <div class="flex items-center gap-2">
+          <span class="text-xs font-black uppercase tracking-wider text-slate-500 bg-slate-100 px-2 py-0.5 rounded-md">
+            {{ listing.category_nama || 'Sisa Bernilai' }}
+          </span>
+          <span class="text-xs text-slate-400 font-semibold">•</span>
+          <span class="text-xs font-bold text-emerald-800 flex items-center gap-1">
+            <span>📍</span>
+            <span>{{ listing.jarak_teks || 'Dekat Anda' }}</span>
+          </span>
         </div>
+        <button
+          @click="$emit('close')"
+          class="w-8 h-8 rounded-full bg-slate-100 hover:bg-slate-200 text-slate-500 hover:text-slate-800 flex items-center justify-center text-sm font-bold transition"
+        >
+          ✕
+        </button>
       </div>
 
+      <!-- Body Modal -->
       <div class="p-5 space-y-4">
-        <!-- Foto Listing -->
-        <div class="relative h-56 rounded-2xl overflow-hidden bg-slate-100">
-          <img
-            :src="listing.foto || listing.foto_url"
-            :alt="listing.judul"
-            class="w-full h-full object-cover"
-          />
-          <div class="absolute top-3 left-3 bg-slate-900/80 backdrop-blur text-white text-xs font-bold px-2.5 py-1 rounded-lg">
-            Jarak: ~{{ listing.jarak_km }} km
+        <!-- Galeri Foto (1-3 foto) -->
+        <div class="space-y-2">
+          <div class="w-full h-60 sm:h-72 rounded-2xl overflow-hidden bg-slate-100 relative">
+            <img
+              :src="activePhoto"
+              :alt="listing.judul"
+              class="w-full h-full object-cover"
+            />
+            <!-- Indikator Jarak -->
+            <div class="absolute bottom-3 left-3 bg-slate-900/80 backdrop-blur px-3 py-1 rounded-xl text-white text-xs font-bold flex items-center gap-1.5">
+              <span>📍 Perkiraan Jarak:</span>
+              <span class="text-emerald-300 font-black">{{ listing.jarak_teks || 'dekat' }}</span>
+            </div>
           </div>
-          <div class="absolute top-3 right-3">
-            <span
-              v-if="listing.harga === 0 || listing.tipe_harga === 'gratis'"
-              class="bg-emerald-600 text-white text-xs font-black px-3 py-1 rounded-lg uppercase tracking-wider"
+
+          <!-- Thumbnails jika lebih dari 1 foto -->
+          <div v-if="listing.foto_urls && listing.foto_urls.length > 1" class="flex gap-2 overflow-x-auto pb-1">
+            <button
+              v-for="(photo, idx) in listing.foto_urls"
+              :key="idx"
+              @click="activePhotoIdx = idx"
+              :class="[
+                'w-16 h-16 rounded-xl overflow-hidden shrink-0 border-2 transition',
+                activePhotoIdx === idx ? 'border-brand-600 scale-105' : 'border-transparent opacity-70 hover:opacity-100'
+              ]"
             >
-              Gratis
+              <img :src="photo" class="w-full h-full object-cover" />
+            </button>
+          </div>
+        </div>
+
+        <!-- Judul & Harga / Skema -->
+        <div>
+          <div class="flex flex-wrap items-center justify-between gap-2 mb-1.5">
+            <span
+              v-if="listing.jenis_harga === 'gratis'"
+              class="text-xs font-extrabold px-3 py-1 rounded-full bg-emerald-100 text-emerald-800"
+            >
+              🎉 Gratis (Hibah Sisa)
+            </span>
+            <span
+              v-else-if="listing.jenis_harga === 'barter'"
+              class="text-xs font-extrabold px-3 py-1 rounded-full bg-amber-100 text-amber-900"
+            >
+              🔄 Skema Barter
             </span>
             <span
               v-else
-              class="bg-amber-600 text-white text-xs font-black px-3 py-1 rounded-lg"
+              class="text-xs font-extrabold px-3 py-1 rounded-full bg-brand-100 text-brand-900"
             >
-              Rp {{ (listing.harga || listing.harga_satuan || 0).toLocaleString('id-ID') }} / {{ listing.satuan }}
+              Rp {{ (listing.nominal_harga || 0).toLocaleString('id-ID') }} / {{ listing.satuan }}
+            </span>
+
+            <span class="text-xs font-bold text-slate-500">
+              Stok Tersedia: <strong class="text-slate-900">{{ listing.stok }} {{ listing.satuan }}</strong>
             </span>
           </div>
-        </div>
 
-        <!-- Judul & Kategori -->
-        <div>
-          <span class="text-xs font-bold text-brand-700 bg-brand-50 px-2.5 py-1 rounded-md">
-            {{ listing.category_name }}
-          </span>
-          <h1 class="text-lg font-black text-slate-900 leading-snug mt-1.5">
+          <h2 class="text-lg sm:text-xl font-black text-slate-900 leading-snug">
             {{ listing.judul }}
-          </h1>
-          <p class="text-xs text-slate-500 mt-1">
-            Volume Rutin: <strong class="text-slate-800">{{ listing.volume_per_minggu }} {{ listing.satuan }}/minggu</strong> • Metode: <strong class="text-slate-800">{{ listing.metode_pengambilan === 'diambil_pencari' ? 'Diambil Pencari' : listing.metode_pengambilan === 'diantar_penghasil' ? 'Diantar Penghasil' : 'Didiskusikan' }}</strong>
-          </p>
-        </div>
+          </h2>
 
-        <!-- 3 Lencana Kepercayaan Profil Pemilik (F3, F11) -->
-        <div class="p-3.5 bg-slate-50 border border-slate-200 rounded-2xl">
-          <div class="flex items-center gap-2 mb-2.5">
-            <div class="w-9 h-9 rounded-full bg-brand-100 text-brand-700 flex items-center justify-center font-black text-sm">
-              {{ (listing.nama_usaha || 'U').charAt(0) }}
-            </div>
-            <div>
-              <div class="text-xs font-extrabold text-slate-900 leading-tight">
-                {{ listing.nama_usaha }}
-              </div>
-              <div class="text-[11px] text-slate-500 font-medium">
-                {{ listing.jenis_usaha || 'Pelaku UMKM Terdaftar' }}
-              </div>
-            </div>
-          </div>
-
-          <TrustBadge
-            :is-email-verified="listing.is_email_verified"
-            :is-location-verified="listing.lokasi_terverifikasi ?? listing.is_lokasi_terverifikasi"
-            :has-confirmed-transactions="listing.has_confirmed_transactions"
-          />
-
-          <!-- Peringatan jika lokasi belum terverifikasi (F3 & F11) -->
-          <div
-            v-if="!(listing.lokasi_terverifikasi ?? listing.is_lokasi_terverifikasi)"
-            class="mt-2.5 p-2 bg-amber-50 border border-amber-200 rounded-xl text-[11px] text-amber-900 leading-tight flex items-start gap-1.5 font-medium"
-          >
-            <svg class="w-4 h-4 text-amber-600 flex-shrink-0 mt-0.5" fill="none" stroke="currentColor" viewBox="0 0 24 24">
-              <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M12 9v2m0 4h.01m-6.938 4h13.856c1.54 0 2.502-1.667 1.732-3L13.732 4c-.77-1.333-2.694-1.333-3.464 0L3.34 16c-.77 1.333.192 3 1.732 3z" />
-            </svg>
-            <span>
-              <strong>Peringatan Keamanan:</strong> Lokasi fisik usaha ini belum diverifikasi lewat GPS kamera perangkat. Selalu periksa barang langsung di lokasi sebelum kesepakatan.
-            </span>
+          <div v-if="listing.keterangan_barter" class="mt-2 p-2.5 bg-amber-50 border border-amber-200 rounded-xl text-xs text-amber-900 font-medium">
+            <strong>Keterangan Barter:</strong> {{ listing.keterangan_barter }}
           </div>
         </div>
 
-        <!-- Deskripsi Barang Limbah -->
-        <div>
-          <h4 class="text-xs font-bold text-slate-500 uppercase tracking-wider mb-1">
-            Keterangan Limbah
-          </h4>
-          <p class="text-xs text-slate-700 leading-relaxed bg-slate-50 p-3 rounded-xl border border-slate-100">
+        <!-- Deskripsi -->
+        <div class="bg-slate-50 rounded-2xl p-4 border border-slate-200 space-y-1">
+          <h4 class="text-xs font-bold uppercase tracking-wider text-slate-500">Keterangan Sisa</h4>
+          <p class="text-xs sm:text-sm text-slate-700 font-medium leading-relaxed whitespace-pre-line">
             {{ listing.deskripsi }}
           </p>
         </div>
 
-        <!-- Informasi Lokasi & WhatsApp (Batas Akses Pengunjung Tamu) -->
-        <div class="p-4 rounded-2xl border transition" :class="listing.is_contact_locked ? 'bg-amber-50/70 border-amber-200' : 'bg-emerald-50/70 border-emerald-200'">
-          <div class="flex items-center justify-between mb-2">
-            <span class="text-xs font-black uppercase tracking-wider" :class="listing.is_contact_locked ? 'text-amber-900' : 'text-emerald-900'">
-              {{ listing.is_contact_locked ? '🔒 Lokasi & Kontak Terkunci (Mode Tamu)' : '✅ Lokasi & Kontak Terbuka' }}
-            </span>
-            <span class="text-[11px] text-slate-500 font-bold">
-              Kedaluwarsa: 14 hari
-            </span>
+        <!-- Rincian Pengambilan & Satuan -->
+        <div class="grid grid-cols-2 gap-2 text-xs">
+          <div class="p-3 bg-slate-50 rounded-xl border border-slate-200">
+            <div class="text-slate-400 font-bold uppercase text-[10px]">Metode Ambil</div>
+            <div class="font-extrabold text-slate-800 mt-0.5">Pencari Ambil Sendiri</div>
           </div>
-
-          <!-- KONDISI TERKUNCI (Pengunjung Tamu) -->
-          <div v-if="listing.is_contact_locked" class="space-y-2">
-            <p class="text-xs text-slate-600">
-              Alamat: <strong>{{ listing.alamat_tampilan }}</strong> (Jalan presisi disamarkan).
-            </p>
-            <p class="text-xs text-slate-600">
-              WhatsApp: <span class="font-mono bg-slate-200/80 px-2 py-0.5 rounded text-slate-700 font-bold">+62 812-****-****</span>
-            </p>
-            <button
-              @click="handleUnlockClick"
-              class="w-full mt-2 py-3 px-3 bg-brand-600 hover:bg-brand-700 text-white text-xs font-extrabold rounded-xl shadow transition flex items-center justify-center gap-1.5 active:scale-95"
-            >
-              <svg class="w-4 h-4" fill="none" stroke="currentColor" viewBox="0 0 24 24">
-                <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M12 15v2m-6 4h12a2 2 0 002-2v-6a2 2 0 00-2-2H6a2 2 0 00-2 2v6a2 2 0 002 2zm10-10V7a4 4 0 00-8 0v4h8z" />
-              </svg>
-              <span>Masuk via OTP Email untuk Buka Kontak & Titik Presisi</span>
-            </button>
+          <div class="p-3 bg-slate-50 rounded-xl border border-slate-200">
+            <div class="text-slate-400 font-bold uppercase text-[10px]">Estimasi Berat</div>
+            <div class="font-extrabold text-slate-800 mt-0.5">
+              {{ listing.berat_per_satuan_kg ? `~${listing.berat_per_satuan_kg} kg/${listing.satuan}` : 'Sesuai kesepakatan' }}
+            </div>
           </div>
+        </div>
 
-          <!-- KONDISI TERBUKA (Pengguna Terverifikasi) -->
-          <div v-else class="space-y-2.5">
-            <div class="text-xs text-slate-800">
-              <div class="font-bold">Alamat Penjemputan Presisi:</div>
-              <div class="text-slate-900 font-medium">{{ listing.alamat_tampilan }}</div>
-              <div v-if="listing.exact_latitude" class="text-[11px] text-slate-500 font-mono mt-0.5">
-                Koordinat Presisi: {{ listing.exact_latitude?.toFixed(5) }}, {{ listing.exact_longitude?.toFixed(5) }}
+        <!-- Profil Pemasok & Tanda Kepercayaan (PRD) -->
+        <div class="p-4 bg-emerald-50/70 border border-emerald-200 rounded-2xl space-y-2">
+          <div class="flex items-center justify-between gap-2">
+            <div class="flex items-center gap-2.5">
+              <div class="w-10 h-10 rounded-full bg-emerald-600 text-white flex items-center justify-center font-black text-sm shrink-0">
+                {{ listing.nama_tampilan.charAt(0) }}
+              </div>
+              <div>
+                <div class="font-black text-slate-900 text-sm">
+                  {{ listing.nama_tampilan }}
+                </div>
+                <div v-if="listing.nama_toko_profesi" class="text-xs font-bold text-emerald-900">
+                  {{ listing.nama_toko_profesi }}
+                </div>
               </div>
             </div>
 
-            <!-- Tombol Hubungi WhatsApp Resmi (Mencatat Deal & Membuka WA) -->
+            <!-- Tombol Ikuti Pemasok -->
             <button
-              @click="handleWhatsApp"
-              class="w-full py-3 px-4 bg-brand-600 hover:bg-brand-700 active:scale-95 text-white text-sm font-extrabold rounded-xl shadow-md transition flex items-center justify-center gap-2"
+              @click="handleToggleFollow"
+              :class="[
+                'px-3 py-1.5 text-xs font-bold rounded-xl border transition flex items-center gap-1',
+                listing.is_following
+                  ? 'bg-amber-100 text-amber-900 border-amber-300'
+                  : 'bg-white text-slate-700 border-slate-300 hover:bg-slate-100'
+              ]"
             >
-              <svg class="w-5 h-5" fill="none" stroke="currentColor" viewBox="0 0 24 24">
-                <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M8 12h.01M12 12h.01M16 12h.01M21 12c0 4.418-4.03 8-9 8a9.863 9.863 0 01-4.255-.949L3 20l1.395-3.72C3.512 15.042 3 13.574 3 12c0-4.418 4.03-8 9-8s9 3.582 9 8z" />
-              </svg>
-              <span>Hubungi via WhatsApp (Format Resmi)</span>
+              <span>{{ listing.is_following ? '★' : '☆' }}</span>
+              <span>{{ listing.is_following ? 'Mengikuti' : 'Ikuti Pemasok' }}</span>
             </button>
-            <p class="text-[10px] text-center text-slate-400">
-              Format salam, volume, dan ID kesepakatan terisi otomatis. Kuota kontak: 10/hari.
-            </p>
           </div>
+
+          <!-- Tanda Kepercayaan -->
+          <TrustBadge
+            :nama-toko-profesi="listing.nama_toko_profesi"
+            :jumlah-transaksi-selesai="listing.transaksi_selesai"
+            :tanggal-bergabung="listing.dibuat_pada"
+          />
         </div>
 
-        <!-- 4 ANJURAN KESELAMATAN WAJIB (PRD Hal. 10 & V7) -->
-        <div class="bg-blue-50/80 border border-blue-200 rounded-2xl p-4">
-          <div class="flex items-center gap-1.5 text-xs font-black text-blue-900 mb-2">
-            <svg class="w-4 h-4 text-blue-700" fill="none" stroke="currentColor" viewBox="0 0 24 24">
-              <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M9 12l2 2 4-4m5.618-4.016A11.955 11.955 0 0112 2.944a11.955 11.955 0 01-8.618 3.04A12.02 12.02 0 003 9c0 5.591 3.824 10.29 9 11.622 5.176-1.332 9-6.03 9-11.622 0-1.042-.133-2.052-.382-3.016z" />
-            </svg>
-            <span>4 Pedoman Keselamatan Antar-UMKM:</span>
+        <!-- Kotak Permintaan Jumlah Sebelum Hubungi WA -->
+        <div class="p-4 bg-slate-50 border border-slate-200 rounded-2xl space-y-2.5">
+          <div class="flex items-center justify-between gap-2">
+            <label class="text-xs font-bold text-slate-700">Jumlah yang Dibutuhkan:</label>
+            <div class="flex items-center gap-1.5">
+              <button
+                @click="requestedQty = Math.max(1, requestedQty - 1)"
+                class="w-7 h-7 bg-white border border-slate-300 rounded-lg font-bold text-slate-700 hover:bg-slate-100"
+              >
+                -
+              </button>
+              <input
+                type="number"
+                min="1"
+                :max="listing.stok"
+                v-model.number="requestedQty"
+                class="w-16 text-center text-xs font-extrabold bg-white border border-slate-300 rounded-lg py-1 text-slate-900 outline-none"
+              />
+              <button
+                @click="requestedQty = Math.min(listing.stok, requestedQty + 1)"
+                class="w-7 h-7 bg-white border border-slate-300 rounded-lg font-bold text-slate-700 hover:bg-slate-100"
+              >
+                +
+              </button>
+              <span class="text-xs font-bold text-slate-600">{{ listing.satuan }}</span>
+            </div>
           </div>
-          <ul class="space-y-1.5 text-[11px] text-blue-950 font-medium list-disc list-inside leading-relaxed">
-            <li><strong>Minta titik lokasi</strong> lewat WhatsApp sebelum berangkat ke lokasi penjemputan.</li>
-            <li><strong>Ambil sampel kecil</strong> terlebih dahulu untuk memastikan kecocokan bahan baku daur ulang Anda.</li>
-            <li><strong>Jangan transfer uang di muka</strong>. Pembayaran dilakukan saat barang dicek fisik di lokasi.</li>
-            <li><strong>Bertemu di tempat usaha fisik</strong> pada jam operasional kerja yang aman dan terang.</li>
-          </ul>
+          <p class="text-[11px] text-slate-500 leading-relaxed">
+            Menekan tombol hubungi akan mencatat transaksi berjalan di tab <strong>Aktivitas</strong> dan membuka WhatsApp untuk menyepakati alamat detail & waktu penjemputan.
+          </p>
         </div>
 
-        <!-- Tombol Laporkan Listing (F12) -->
-        <div class="pt-2 text-center">
+        <!-- Action Buttons -->
+        <div class="space-y-2 pt-1">
+          <!-- Tombol Hubungi via WhatsApp -->
           <button
-            @click="handleReportClick"
-            class="text-xs font-bold text-red-600 hover:text-red-700 hover:underline inline-flex items-center gap-1"
+            @click="handleContactWa"
+            class="w-full py-3.5 px-4 bg-emerald-600 hover:bg-emerald-700 active:scale-95 text-white font-black text-xs sm:text-sm rounded-2xl shadow-lg shadow-emerald-600/30 transition flex items-center justify-center gap-2"
           >
-            <svg class="w-4 h-4" fill="none" stroke="currentColor" viewBox="0 0 24 24">
-              <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M12 9v2m0 4h.01m-6.938 4h13.856c1.54 0 2.502-1.667 1.732-3L13.732 4c-.77-1.333-2.694-1.333-3.464 0L3.34 16c-.77 1.333.192 3 1.732 3z" />
-            </svg>
-            <span>Laporkan Listing / Pemilik Tidak Sesuai</span>
+            <span>💬 Hubungi via WhatsApp</span>
+            <span>({{ requestedQty }} {{ listing.satuan }})</span>
           </button>
+
+          <!-- Tombol Laporkan Postingan -->
+          <div class="flex justify-between items-center pt-2">
+            <span class="text-[11px] text-slate-400">
+              Menemukan limbah B3 atau pelanggaran?
+            </span>
+            <button
+              @click="$emit('open-report', listing)"
+              class="text-xs text-red-600 hover:text-red-700 font-bold hover:underline flex items-center gap-1"
+            >
+              <span>🚨 Laporkan Postingan</span>
+            </button>
+          </div>
         </div>
       </div>
     </div>
@@ -203,31 +216,37 @@
 </template>
 
 <script setup lang="ts">
+import { ref, computed } from 'vue';
 import { WasteListing } from '../types';
-import TrustBadge from './TrustBadge.vue';
 import { useWasteApp } from '../composables/useWasteApp';
+import TrustBadge from './TrustBadge.vue';
 
 const props = defineProps<{
-  listing: WasteListing | null;
+  listing: WasteListing;
 }>();
 
 const emit = defineEmits(['close', 'open-report']);
 
-const { requireAuth, contactListing, toggleFavorite, isFavorite } = useWasteApp();
+const { contactSupplierViaWa, toggleFollowSupplier } = useWasteApp();
 
-function handleUnlockClick() {
-  requireAuth('membuka titik lokasi presisi dan nomor WhatsApp pemilik listing');
-}
+const activePhotoIdx = ref(0);
+const requestedQty = ref(1);
 
-function handleWhatsApp() {
-  if (props.listing) {
-    contactListing(props.listing);
+const activePhoto = computed(() => {
+  if (props.listing.foto_urls && props.listing.foto_urls.length > 0) {
+    return props.listing.foto_urls[activePhotoIdx.value] || props.listing.foto_urls[0];
+  }
+  return 'https://images.unsplash.com/photo-1540555700478-4be289fbecef?auto=format&fit=crop&w=600&q=80';
+});
+
+function handleContactWa() {
+  const res = contactSupplierViaWa(props.listing, requestedQty.value);
+  if (res.success) {
+    emit('close');
   }
 }
 
-function handleReportClick() {
-  if (requireAuth('melaporkan listing')) {
-    emit('open-report', props.listing);
-  }
+function handleToggleFollow() {
+  toggleFollowSupplier(props.listing.user_id);
 }
 </script>
